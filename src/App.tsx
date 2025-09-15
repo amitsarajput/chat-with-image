@@ -5,6 +5,7 @@ import { faker } from "@faker-js/faker";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../convex/_generated/api";
 
+import { ImageUpload } from "./components/ImageUpload";
 
 
 
@@ -14,6 +15,7 @@ const NAME = getOrSetFakeName();
 const SUBJECT_KEY = "selected_subject";
 
 export default function App() {
+  
   const path = window.location.pathname;
 
   const [activeTab, setActiveTab] = useState<"physics" | "chemistry" | "maths">(getInitialSubject());
@@ -177,9 +179,20 @@ export default function App() {
         >
           <div>{message.user}</div>
 
+          
+
           <p
             onClick={() => handleMessageClick(message._id)}
-          >{message.body}
+          >
+          {message.imageUrl && (
+            <img
+              src={message.imageUrl}
+              alt="shared"
+              style={{ maxWidth: "300px", borderRadius: "8px", marginTop: "8px" }}
+            />
+          )}
+
+            {message.body}
           { message.deleted_at? (
             <small><br />{new Date(message.deleted_at).toLocaleString()}</small>
             ) : <small className="msg-time"><br />{new Date(message._creationTime).toLocaleString()}</small>}
@@ -223,6 +236,7 @@ export default function App() {
           setNewMessageText("");
         }}
       >
+
         <input
           value={newMessageText}
           onChange={async (e) => {
@@ -232,7 +246,8 @@ export default function App() {
           placeholder="Write a message…"
           autoFocus
         />
-        <button type="submit" disabled={!newMessageText}>
+        <ImageUpload user={NAME} />
+        <button className="send-button" type="submit" disabled={!newMessageText}>
           Send
         </button>
       </form>
