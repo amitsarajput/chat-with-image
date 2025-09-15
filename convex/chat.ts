@@ -4,8 +4,6 @@ import { v } from "convex/values";
 import { Id } from "./_generated/dataModel";
 
 
-
-
 export const sendMessage = mutation({
   args: {
     user: v.string(),
@@ -13,14 +11,22 @@ export const sendMessage = mutation({
     imageStorageId: v.optional(v.id("_storage")),
   },
   handler: async (ctx, args) => {
-    //console.log("This TypeScript function is running on the server.");
+    const hasText = args.body && args.body.trim() !== "";
+    const hasImage = !!args.imageStorageId;
+
+    if (!hasText && !hasImage) {
+      throw new Error("Message must contain either text or an image.");
+    }
+
     await ctx.db.insert("messages", {
       user: args.user,
-      body: args.body,
-      deleted_at: null, // default value
+      body: args.body ?? "",
+      imageStorageId: args.imageStorageId ?? undefined,
+      deleted_at: null,
     });
   },
 });
+
 // Add the following function to the file:
 export const getMessages = query({
   args: {},
@@ -102,20 +108,5 @@ export const generateUploadUrl = mutation({
   },
 });
 
-// Save the image message
-export const sendImageMessage = mutation({
-  args: {
-    user: v.string(),
-    imageStorageId: v.id("_storage"),
-  },
-  handler: async (ctx, { user, imageStorageId }) => {
-    await ctx.db.insert("messages", {
-      user,
-      body: "", // optional caption
-      imageStorageId,
-      deleted_at: null,
-    });
-  },
-});
 
 

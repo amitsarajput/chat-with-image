@@ -5,7 +5,7 @@ import { api } from "../../convex/_generated/api";
 export function ImageUpload({ user }: { user: string }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const generateUploadUrl = useMutation(api.chat.generateUploadUrl);
-  const sendImageMessage = useMutation(api.chat.sendImageMessage);
+  const sendMessage = useMutation(api.chat.sendMessage);
 
   const handleClick = () => {
     fileInputRef.current?.click();
@@ -14,7 +14,12 @@ export function ImageUpload({ user }: { user: string }) {
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
+    // ✅ Check if the file is an image
+    if (!file.type.startsWith("image/")) {
+        alert("Please select a valid image file (JPEG, PNG, etc).");
+        return;
+    }
+    
     const uploadUrl = await generateUploadUrl();
     const response = await fetch(uploadUrl, {
       method: "POST",
@@ -23,7 +28,7 @@ export function ImageUpload({ user }: { user: string }) {
     });
 
     const { storageId } = await response.json();
-    await sendImageMessage({ user, imageStorageId: storageId });
+    await sendMessage({ user, imageStorageId: storageId });
   };
 
   return (
