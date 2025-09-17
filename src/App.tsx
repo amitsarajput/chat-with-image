@@ -102,8 +102,15 @@ export default function App() {
   }
 
   const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null);
+  const [clickCountDeleteMsg, setClickCountDeleteMsg] = useState(1);
   const handleMessageClick = (id: string) => {
-    setSelectedMessageId(id);
+    if (clickCountDeleteMsg > 2) {
+      setSelectedMessageId(id);
+      setClickCountDeleteMsg(1);
+    } else {      
+      setSelectedMessageId(null);
+      setClickCountDeleteMsg(prev => prev + 1);
+    }
   };
 
   const deleteMessage = useMutation(api.chat.deleteMessageById);

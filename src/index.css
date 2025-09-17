@@ -144,6 +144,9 @@ button {
   padding-left: 1.2em;
   font-weight: 300;
 }
+.chat header h1,.chat header p {
+  cursor: default;
+}
 
 .chat header p::before,
 .chat header p::after {
@@ -202,6 +205,7 @@ button {
   padding-right: calc(16px + 10vw);
   animation: 0.15s ease-in-out message;
   box-sizing: content-box;
+  cursor: default;
 }
 
 @media (prefers-reduced-motion) {
