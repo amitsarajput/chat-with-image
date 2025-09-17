@@ -11,11 +11,15 @@ import { ImageUpload } from "./components/ImageUpload";
 
 
 // For demo purposes. In a real app, you'd have real user data.
-const NAME = getOrSetFakeName();
+//const NAME = getOrSetFakeName();
 const SUBJECT_KEY = "selected_subject";
+const NAME_KEY = "tutorial_name";
 
 export default function App() {
-  
+
+  const [NAME, setNAME] = useState<string>(getStoredName()||'');
+
+
   const path = window.location.pathname;
 
   const [activeTab, setActiveTab] = useState<"physics" | "chemistry" | "maths">(getInitialSubject());
@@ -24,6 +28,18 @@ export default function App() {
   
   // Clear chat_hidden only if user visits /show-chat
   useEffect(() => {
+    
+    if (!NAME || NAME.trim() === "") {
+      const newName = prompt("Enter your name:");
+      if (newName && newName.trim() !== "") {
+        storeName(newName.trim());
+        setNAME(newName.trim());
+      } else {
+        const newName = generateFakeName();
+        setNAME(newName);
+      }
+    }
+
     if (sessionStorage.getItem("chat_hidden")===null) {
       sessionStorage.setItem("chat_hidden", "true");
       setHidden(sessionStorage.getItem("chat_hidden") === "true");
@@ -38,7 +54,7 @@ export default function App() {
       sessionStorage.clear();
       window.location.replace("/");
     }
-  }, [path]);
+  }, [path, NAME]);
   
 
   
@@ -64,7 +80,7 @@ export default function App() {
   const setConversationStatus = useMutation(api.chat.setConversationStatus);
   const chatStatus = useQuery(api.chat.getConversationStatus);
 
-  const [clickCount, setClickCount] = useState(1);
+  const [clickCount, setClickCount] = useState(0);
   const handleOpenClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
       e.preventDefault();
       if (clickCount > 2) {
@@ -78,7 +94,7 @@ export default function App() {
     }
   
 
-  const [clickCountChatStatus, setClickCountChatStatus] = useState(1);
+  const [clickCountChatStatus, setClickCountChatStatus] = useState(0);
   const handleChatStatusClick = async (e: React.MouseEvent<HTMLAnchorElement>) => {
       e.preventDefault();
       if (clickCountChatStatus > 5) {
@@ -102,11 +118,11 @@ export default function App() {
   }
 
   const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null);
-  const [clickCountDeleteMsg, setClickCountDeleteMsg] = useState(1);
+  const [clickCountDeleteMsg, setClickCountDeleteMsg] = useState(0);
   const handleMessageClick = (id: string) => {
     if (clickCountDeleteMsg > 2) {
       setSelectedMessageId(id);
-      setClickCountDeleteMsg(1);
+      setClickCountDeleteMsg(0);
     } else {      
       setSelectedMessageId(null);
       setClickCountDeleteMsg(prev => prev + 1);
@@ -130,8 +146,7 @@ export default function App() {
     };
   }, []);
   
-  
-  //console.log("selectedMessageId:", selectedMessageId);
+
 
   return (
     <main className="chat">
@@ -172,7 +187,7 @@ export default function App() {
 
         </div>
         <p>
-          Connected as <strong>{NAME}</strong>
+          Connected as <strong style={{ textTransform: "uppercase" }}>{NAME}</strong>
         </p>
       </header>
 
@@ -253,7 +268,9 @@ export default function App() {
           placeholder="Write a message…"
           autoFocus
         />
+
         <ImageUpload user={NAME} />
+
         <button className="send-button" type="submit" disabled={!newMessageText}>
           Send
         </button>
@@ -486,6 +503,21 @@ function getInitialSubject(): "physics" | "chemistry" | "maths" {
   }
   sessionStorage.setItem(SUBJECT_KEY, "physics"); // default
   return "physics";
+}
+
+
+function generateFakeName(): string {
+  const newName = faker.person.firstName();
+  storeName(newName);
+  return newName;
+}
+
+function getStoredName(): string | null {
+  return sessionStorage.getItem(NAME_KEY) || '';
+}
+
+function storeName(NAME: string) {
+  sessionStorage.setItem(NAME_KEY, NAME.trim());
 }
 
 
